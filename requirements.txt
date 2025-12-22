@@ -1,0 +1,22 @@
+# Core analysis
+pandas>=2.2.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+statsmodels>=0.14.0
+
+# Forecasting
+prophet>=1.1.0
+
+# Parallelization + utilities
+joblib>=1.5.0
+
+# Reading Excel files
+openpyxl>=3.1.0
+
+# Jupyter notebook
+jupyter>=1.1.1
+jupyterlab>=4.0.0 # Optional, can comment out if running in VS Code
+ipykernel>=6.29.0
+
+# Streamlit
+streamlit>=1.52.2,<1.53.0
