@@ -49,13 +49,6 @@ def weekly_from_daily(ds, y, week_rule="W-SUN"):
     return s
 
 def format_for_display(df: pd.DataFrame, target: str) -> pd.DataFrame:
-    """
-    Display-friendly:
-      - qty -> rounded int
-      - revenue -> $ with 2 decimals
-      - rename columns to readable names
-      - remove 00:00:00 from ds/week_end (show date only)
-    """
     df2 = df.copy()
 
     if "ds" in df2.columns:
@@ -84,12 +77,6 @@ def format_for_display(df: pd.DataFrame, target: str) -> pd.DataFrame:
     return df2
 
 def format_for_download(df: pd.DataFrame, target: str) -> pd.DataFrame:
-    """
-    Download-friendly (numeric, rounded):
-      - qty -> nearest int
-      - revenue -> 2 decimals
-      - rename columns to readable names (snake_case)
-    """
     df2 = df.copy()
     rename_map = {
         "yhat": "forecast",
