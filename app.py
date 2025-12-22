@@ -5,7 +5,7 @@ import streamlit as st
 import joblib
 
 st.set_page_config(page_title="Prophet Forecast App", layout="wide")
-st.title("📈 E-commerce Book Sales Data Forecast")
+st.title("📈 E-Commerce Book Sales Data Forecast")
 
 MODELS_DIR = Path("models")
 
@@ -18,10 +18,6 @@ def load_artifact(path: Path):
 
 @st.cache_resource
 def load_all_artifacts(models_dir: Path):
-    """
-    Load all joblibs once and build an index:
-      index[category][target] -> {"path": Path, "meta": dict, "artifact": dict}
-    """
     index = {}
     for p in sorted(models_dir.glob("model__*.joblib")):
         art = load_artifact(p)
@@ -49,13 +45,6 @@ def weekly_from_daily(ds, y, week_rule="W-SUN"):
     return s
 
 def format_for_display(df: pd.DataFrame, target: str) -> pd.DataFrame:
-    """
-    Display-friendly:
-      - qty -> rounded int
-      - revenue -> $ with 2 decimals
-      - rename columns to readable names
-      - remove 00:00:00 from ds/week_end (show date only)
-    """
     df2 = df.copy()
 
     if "ds" in df2.columns:
@@ -72,24 +61,24 @@ def format_for_display(df: pd.DataFrame, target: str) -> pd.DataFrame:
     df2 = df2.rename(columns={k: v for k, v in rename_map.items() if k in df2.columns})
 
     if target == "revenue":
-        money_cols = [c for c in ["Forecast", "Lower bound (80%)", "Upper bound (80%)", "Weekly forecast"] if c in df2.columns]
+        money_cols = [
+            c for c in ["Forecast", "Lower bound (80%)", "Upper bound (80%)", "Weekly forecast"]
+            if c in df2.columns
+        ]
         for c in money_cols:
             df2[c] = df2[c].astype(float).round(2)
             df2[c] = df2[c].map(lambda x: f"${x:,.2f}" if pd.notna(x) else "")
     else:
-        num_cols = [c for c in ["Forecast", "Lower bound (80%)", "Upper bound (80%)", "Weekly forecast"] if c in df2.columns]
+        num_cols = [
+            c for c in ["Forecast", "Lower bound (80%)", "Upper bound (80%)", "Weekly forecast"]
+            if c in df2.columns
+        ]
         for c in num_cols:
             df2[c] = df2[c].astype(float).round(0).astype("Int64")
 
     return df2
 
 def format_for_download(df: pd.DataFrame, target: str) -> pd.DataFrame:
-    """
-    Download-friendly (numeric, rounded):
-      - qty -> nearest int
-      - revenue -> 2 decimals
-      - rename columns to readable names (snake_case)
-    """
     df2 = df.copy()
     rename_map = {
         "yhat": "forecast",
@@ -109,6 +98,23 @@ def format_for_download(df: pd.DataFrame, target: str) -> pd.DataFrame:
                 df2[c] = df2[c].astype(float).round(0).astype("Int64")
 
     return df2
+
+def validate_logistic_future(future: pd.DataFrame):
+    future["floor"] = pd.to_numeric(future["floor"], errors="coerce")
+    future["cap"] = pd.to_numeric(future["cap"], errors="coerce")
+
+    if future[["cap", "floor"]].isna().any().any():
+        bad = future[future[["cap", "floor"]].isna().any(axis=1)].head(5)
+        st.error("Invalid logistic cap/floor: NaN after conversion. Showing first bad rows:")
+        st.dataframe(bad[["ds", "cap", "floor"]], use_container_width=True)
+        st.stop()
+
+    if not (future["cap"] > future["floor"]).all():
+        bad = future[future["cap"] <= future["floor"]].head(5)
+        st.error("Invalid logistic cap/floor: some rows have cap <= floor. Showing first bad rows:")
+        st.dataframe(bad[["ds", "cap", "floor"]], use_container_width=True)
+        st.stop()
+
 
 # -----------------------------
 # Load model index (category x target)
@@ -148,8 +154,6 @@ if isinstance(cap_clip, (int, float)) and cap_clip is not None:
 else:
     cap_clip_str = str(cap_clip)
 
-st.subheader("By Aini Nur Zahiyah Maulani")
-
 st.caption(
     f"**Category:** {meta.get('category','?')}  •  "
     f"**Target:** {meta.get('target','?')}  •  "
@@ -176,17 +180,37 @@ if bool(meta.get("use_logistic", False)):
     if floor_log is None or cap_log is None:
         st.error("This model uses logistic growth but floor_log/cap_log are missing in meta.")
         st.stop()
+
     future["floor"] = float(floor_log)
     future["cap"] = float(cap_log)
+    validate_logistic_future(future)
+
+if not show_intervals:
+    try:
+        m.uncertainty_samples = 0
+    except Exception:
+        # If Prophet object doesn't allow setting, we just proceed; worst case you still get intervals/crash.
+        pass
 
 pred = m.predict(future)
 
+# -----------------------------
+# Postprocess back to original scale
+# -----------------------------
 out = pd.DataFrame({"ds": pred["ds"]})
-for col in ["yhat", "yhat_lower", "yhat_upper"]:
+
+# If uncertainty was disabled, these columns might not exist. Handle gracefully.
+cols = ["yhat"]
+if show_intervals:
+    cols += ["yhat_lower", "yhat_upper"]
+
+for col in cols:
     if col in pred.columns:
         vals = pred[col].to_numpy(dtype=float)
+        
         if meta.get("needs_expm1", True):
             vals = np.expm1(vals)
+
         out[col] = np.clip(vals, 0.0, None)
 
 # -----------------------------
@@ -229,7 +253,7 @@ st.download_button(
     "Download daily forecast CSV",
     data=daily_download.to_csv(index=False).encode("utf-8"),
     file_name=f"forecast_daily_{safe_name(meta.get('category','cat'))}_{safe_name(meta.get('target','tgt'))}.csv",
-    mime="text/csv"
+    mime="text/csv",
 )
 
 if show_weekly and wk_df is not None:
@@ -238,5 +262,5 @@ if show_weekly and wk_df is not None:
         "Download weekly forecast CSV",
         data=weekly_download.to_csv(index=False).encode("utf-8"),
         file_name=f"forecast_weekly_{safe_name(meta.get('category','cat'))}_{safe_name(meta.get('target','tgt'))}.csv",
-        mime="text/csv"
-)
+        mime="text/csv",
+    )
