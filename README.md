@@ -20,13 +20,14 @@ To run the notebook, follow these instructions:
    - CPU machine is enough (no GPU required)
 
 2. **Create and activate a virtual environment**
-**Windows (PowerShell)**
+   
+Windows (PowerShell)
 ```
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 ```
-**macOS/Linux**
+macOS/Linux
 ```
 python3 -m venv .venv
 source .venv/bin/activate
@@ -39,6 +40,7 @@ pip install -r requirements.txt
 ```
 
 4. **Launch Jupyter and open the notebook**
+
 Once Jupyter notebook is installed (already in `requirements.txt`), this works immediately: 
 ```
 jupyter notebook
@@ -46,6 +48,7 @@ jupyter notebook
 Then open `notebook.ipynb` from the browser UI.
 
 5. **Run the notebook**
+
 Run cells from top to bottom. If the notebook writes output files (CSVs/models), they will appear in the working directory unless otherwise specified in the notebook.
 
 ### CPU and Multithreading Notes
