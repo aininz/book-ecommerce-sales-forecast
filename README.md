@@ -18,12 +18,12 @@ To run the notebook, follow these instructions:
    - ``pip`` available
    - CPU machine is enough (no GPU required)
 
-2. Create a virtual environment:
+2. **Create a virtual environment:**
    ```sh
    python -m venv venv
    ```
 
-3. Activate the virtual environment:
+3. **Activate the virtual environment:**
    - Windows:
      ```sh
      .\venv\Scripts\activate
