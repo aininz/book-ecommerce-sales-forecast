@@ -13,17 +13,17 @@ This work focuses on the categories Medical and Science & Technology and targets
 ## How to Run the Notebook
 To run the notebook, follow these instructions:
 
-1. **Prerequisites**
+1. Prerequisites
    - Python 3.10+
    - ``pip`` available
    - CPU machine is enough (no GPU required)
 
-2. **Create a virtual environment:**
+2. Create a virtual environment:
    ```sh
    python -m venv venv
    ```
 
-3. **Activate the virtual environment:**
+3. Activate the virtual environment:
    - Windows:
      ```sh
      .\venv\Scripts\activate
@@ -33,12 +33,12 @@ To run the notebook, follow these instructions:
      source venv/bin/activate
      ```
 
-3. **Install dependencies**
+3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Launch Jupyter and open the notebook**
+4. Launch Jupyter and open the notebook
 
 Once Jupyter notebook is installed (already in `requirements.txt`), this works immediately: 
 ```bash
@@ -46,7 +46,7 @@ jupyter notebook
 ```
 Then open `notebook.ipynb` from the browser UI.
 
-5. **Run the notebook**
+5. Run the notebook
 
 Run cells from top to bottom. If the notebook writes output files (CSVs/models), they will appear in the working directory unless otherwise specified in the notebook.
 
