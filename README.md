@@ -2,8 +2,6 @@
 
 [Demo (Streamlit)](https://book-ecommerce-sales-forecast-6ssdapfb2bsk8bccbhc5gu.streamlit.app/) | [GitHub](https://github.com/aininz/book-ecommerce-sales-forecast)
 
-![alt](/images/ecommerce_book_sales/header.png)
-
 This is a **time series forecasting** pipeline built using **Prophet** to predict `qty` and `revenue` per category using daily ecommerce book sales data from 2020-2022. The model was tuned using a grid search with a time-based holdout split (train before 2022-01-01, test from 2022-01-01 onward) over key Prophet hyperparameters (seasonality mode, changepoint/seasonality priors, yearly seasonality), and enhanced with holiday effects and additional custom seasonalities (monthly/semester). Accuracy was measured using WAPE and MAE at both daily and weekly-aggregated levels, with a 7-day seasonal naive baseline (t-7) used for context.
 
 ## Objective
