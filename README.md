@@ -38,7 +38,7 @@ To run the notebook, follow these instructions:
 conda create -n myenv python=3.11 -y
 ```
 
-3. **Activate the virtual environment and upgrade pip**
+3. Activate the virtual environment and upgrade `pip`
 ```sh
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
@@ -50,7 +50,7 @@ conda activate myenv
 python -m pip install --upgrade pip
 ```
 
-4. **Install dependencies**
+4. Install dependencies
 ```sh
 python -m pip install -r requirements.txt
 ```
@@ -60,7 +60,7 @@ python -m pip install -r requirements.txt
    python -m pip install -U --force-reinstall ipykernel
    ```
 
-5. **Launch Jupyter and open the notebook**
+5. Launch Jupyter and open the notebook
 
 Once Jupyter notebook is installed (already in `requirements.txt`), this works immediately: 
 ```sh
@@ -68,7 +68,7 @@ jupyter notebook
 ```
 Then open `notebook.ipynb` from the browser UI.
 
-6. **Run the notebook**
+6. Run the notebook
 Run cells from top to bottom. If the notebook writes output files (CSVs/models), they will appear in the working directory unless otherwise specified in the notebook.
 
 ### CPU and Multithreading Notes
