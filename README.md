@@ -98,24 +98,24 @@ A US holiday calendar was then used to create calendar-based variables:
 No additional cleaning (such as missing date imputation or negative value correction) was needed because the dataset contained a complete daily date range and passed basic sanity checks. Outliers were not removed during preprocessing. Instead, outlier handling was treated as a modeling choice and evaluated later using winsorization (value capping) applied only to the training set. This approach reduces sensitivity to extreme values while avoiding data leakage from the test period.
 ### 3. EDA
 #### 3.1 Year-to-year Totals
-![eda_chart01](/images/ecommerce_book_sales/eda_chart01.png)
-![eda_chart02](/images/ecommerce_book_sales/eda_chart02.png)
+![eda_chart01](/charts/eda_chart01.png)
+![eda_chart02](/charts/eda_chart02.png)
 
 Total `revenue` and `qty` by year were compared for each category. This provides a simple sanity check on whether demand levels are stable or shifting over time. Because the dataset covers only about three years, these totals should not be treated as evidence of long-term annual seasonality. However, they help confirm that category-level demand changes across years, which can affect how the model learns trend and seasonality.
 #### 3.2 Daily Series Plot (7d rolling)
 Exploratory Data Analysis (EDA) was performed to understand the structure of the sales time series before modeling. For each category and target (`revenue` ,  `qty`), the raw daily series was plotted along with a 7-day rolling mean to reduce day-to-day noise and make the broader pattern easier to see. The example below shows chart for Medical `qty`.
 
-![eda_chart02](/images/ecommerce_book_sales/eda_chart03.png)
+![eda_chart02](/charts/eda_chart03.png)
 #### 3.3 Seasonal Decomposition
 To better understand long-term patterns, a seasonal decomposition was applied to weekly-aggregated data. Daily values were resampled into weekly totals (W-SUN) to reduce day-to-day noise, and the weekly series was decomposed using an additive model with a 52-week period as an approximation of yearly seasonality. The decomposition separates the signal into trend, seasonal, and residual components, making it easier to assess whether an annual cycle is present and how much variation is driven by seasonality versus irregular shocks.
 
 These plots were used as a diagnostic to decide whether adding a yearly component was likely to be helpful. For example, the Medical category showed a clear long-term downward trend, which makes yearly seasonality a reasonable feature to consider during modeling.
 
-![eda_chart04](/images/ecommerce_book_sales/eda_chart04.png)
+![eda_chart04](/charts/eda_chart04.png)
 #### 3.4 Monthly Pattern Exploration
 Month-level seasonality was examined by plotting average demand by month for each category and target using bar charts (see graph below for an example using Science & Technology). This provided a high-level view of whether certain months consistently show higher activity beyond normal fluctuations.
 
-![eda_chart05](/images/ecommerce_book_sales/eda_chart05.png)
+![eda_chart05](/charts/eda_chart05.png)
 
 Clear peaks were observed in **January** and **August** across both categories and targets, which suggests the presence of recurring seasonal drivers. Given the product categories (Medical and Science & Technology) and the timing of these peaks, a working hypothesis was formed that the spikes may be related to **academic semester start periods**, when textbooks and related materials are commonly purchased. Because academic calendars can vary, this hypothesis was treated as a tentative explanation and was tested against the data rather than immediately assumed to be true.
 
@@ -146,8 +146,8 @@ After January and August were identified as peak months, additional analysis was
 #### 3.5 Weekly Pattern Exploration
 Weekly seasonality was assessed using autocorrelation. For each category and target, correlations were at lag 1 (short-term dependence) and lag 7 (weekly repeat pattern), and generated Autocorrelation Function (ACF) plots over a wider range of lags. ACF was computed on both `log1p(y)` and `diff(log1p(y))` to separate repeating seasonal structure from trend effects. This analysis was only done on `qty` because it is less affected by price and product mix than revenue, but the same checks were also used as a loose reference for revenue. Below is an example of ACF plots for Science & Technology.
 
-![eda_chart06](/images/ecommerce_book_sales/eda_chart06.png)
-![eda_chart07](/images/ecommerce_book_sales/eda_chart07.png)
+![eda_chart06](/charts/eda_chart06.png)
+![eda_chart07](/charts/eda_chart07.png)
 
 All ACF plots showed clear peaks at lags 7, 14, 21, and 28, which is consistent with a repeating weekly pattern. This supported two modeling choices: enabling weekly seasonality in Prophet and using a 7-day seasonal naive baseline (t-7) as a meaningful reference during evaluation.
 #### 3.6 Holiday Effect Analysis
@@ -171,7 +171,7 @@ To isolate holiday impacts from normal calendar patterns, a regression-based che
 
 Finally, a day-of-week adjusted holiday profile (7 days before and 7 days after each holiday) was visualized to examine the shape of demand changes surrounding holiday dates after removing typical weekday patterns (see graph below for an example on Science & Technology `revenue`). The profile supported the conclusion that the primary impact occurs on the holiday itself, with weaker and less consistent patterns on neighboring days. A limitation of this analysis is that all holidays were treated uniformly. Differences between major holidays and minor holidays were not explicitly modeled, and academic breaks were not incorporated into the model at all.
 
-![eda_chart08](/images/ecommerce_book_sales/eda_chart08.png)
+![eda_chart08](/charts/eda_chart08.png)
 #### 3.7 Model Selection
 Prophet was chosen as the main forecasting model because the data is daily time-series data and shows clear calendar-related patterns (weekly cycles, holidays, and repeated peaks). The project also involves several series (category x target), so the model needs to be accurate and reasonably easy to tune and maintain.
 
@@ -274,11 +274,11 @@ Overall, holdout performance was solid across all series, indicating that the mo
 
 Weekly patterns in Science & Technology are more consistently detectable by the model in the holdout dataset, while Medical `qty` appears less stable, with a single atypical spike in January 2022 where the increase in units is harsher than the increase in revenue (see the graphs below). One possible explanation is a temporary change in average selling price (e.g., discounting or a promotion), but this has not been verified. Before any promotion-related feature is added to the model, the spike should be investigated by checking the implied unit price (`revenue/qty`) and, if available, reviewing order-level details for that period.
 
-![results_chart01](/images/ecommerce_book_sales/results_chart01.png)
+![results_chart01](/charts/results_chart01.png)
 
 Below are the **full charts forecasted through 2026 (3 years)** on a weekly basis. However, it is not recommended to rely on forecasts beyond about one year. These models were trained on only three years of data, which limits how well they can learn stable year-to-year patterns and rare disruptions. As the horizon extends, uncertainty grows and the predictions become less dependable (i.e., the model can drift if the underlying demand pattern changes).
 
-![results_chart02](/images/ecommerce_book_sales/results_chart02.png)
+![results_chart02](/charts/results_chart02.png)
 
 In particular, Medical ``qty`` should be treated with extra caution. Compared with the other series, it shows weaker fit and more irregular spikes, so the model is less confident about its baseline level and peak timing. As a result, the long-range projection for Medical ``qty`` may drift more as the forecast horizon increases.
 
